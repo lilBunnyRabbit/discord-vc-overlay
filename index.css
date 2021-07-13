@@ -15,7 +15,6 @@ body {
 
 .app-container {
   width: 100%;
-  max-width: 1300px;
   position: relative;
   display: flex;
   flex-direction: column;
