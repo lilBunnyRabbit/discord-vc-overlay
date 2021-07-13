@@ -1,0 +1,48 @@
+.overlay-preview {
+  border: 2px solid var(--bg-faded);
+  margin-top: 32px;
+  width: 100%;
+  max-width: 100%;
+  overflow-y: auto;
+  border-radius: 4px;
+  min-height: 166px;
+  box-sizing: border-box;
+  padding: 0px 16px;
+  margin-bottom: 32px;
+
+  background: linear-gradient(
+    45deg,
+    #f17c58,
+    #e94584,
+    #24aadb,
+    #27dbb1,
+    #ffdc18,
+    #ff3706,
+    #000000,
+    #000000,
+    #ffffff,
+    #ffffff
+  );
+  background-size: 1000% 100%;
+  animation: gradient 20s linear infinite;
+  animation-direction: alternate;
+}
+
+.remove-user-button {
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  z-index: 1000;
+  cursor: pointer;
+  user-select: none;
+  stroke: #b72222;
+}
+
+@keyframes gradient {
+  0% {
+    background-position: 0%;
+  }
+  100% {
+    background-position: 100%;
+  }
+}

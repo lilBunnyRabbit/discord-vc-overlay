@@ -1,0 +1,49 @@
+.overlay-config {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.congifs {
+  margin-top: 16px;
+  border: 2px solid var(--bg-faded);
+  padding: 16px;
+  border-radius: 4px;
+}
+
+.config-box {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.config-box:last-child {
+  margin-bottom: 0px;
+}
+
+.config-label {
+  flex-grow: 10;
+  width: 125px;
+  padding: 4px 8px;
+  font-weight: 700;
+  font-family: Consolas;
+  /* background-color: var(--primary); */
+  color: white;
+}
+
+.config-data {
+  width: 100%;
+  border-radius: 4px;
+  color: white;
+  font-family: Consolas;
+  font-weight: 500;
+  border: 2px solid var(--primary);
+  padding: 4px 8px;
+  max-height: 200px;
+  overflow-y: auto;
+  overflow-wrap: break-word;
+}
