@@ -1,0 +1,49 @@
+.voice-container {
+  font-family: Whitney;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 19px;
+  color: #fff;
+}
+
+.voice-container .voice-states {
+  list-style-type: none;
+  padding-left: 15px;
+}
+
+.voice-container .voice-states .voice-state {
+  height: 50px;
+  margin-bottom: 8px;
+}
+
+li {
+  display: list-item;
+  text-align: -webkit-match-parent;
+}
+
+.voice-container .voice-states {
+  list-style-type: none;
+  padding-left: 15px;
+}
+
+.voice-container .voice-states .voice-state .avatar {
+  height: 50px;
+  width: 50px;
+  border: 3px solid transparent;
+  border-radius: 50%;
+  float: left;
+  margin-right: 8px;
+}
+
+.voice-container .voice-states .voice-state .avatar.speaking {
+  border-color: #43b581;
+}
+
+.voice-container .voice-states .voice-state .avatar {
+  height: 50px;
+  width: 50px;
+  border: 3px solid transparent;
+  border-radius: 50%;
+  float: left;
+  margin-right: 8px;
+}

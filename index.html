@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <!-- IMPORTS -->
+    <script src="https://unpkg.com/vue@2.6.14/dist/vue.js"></script>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=G-V8HYKKZTP6"
+    ></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+
+      gtag("config", "G-V8HYKKZTP6");
+    </script>
+
+    <!-- DEFAULT -->
+    <script src="./index.js"></script>
+    <link rel="stylesheet" href="./index.css" />
+    <link rel="stylesheet" href="./overlay.css" />
+    <link rel="stylesheet" href="./streamkit.css" />
+    <style id="user-styles"></style>
+
+    <title>Panda Aquarium</title>
+  </head>
+
+  <body>
+    <div id="app">
+      <app-container></app-container>
+    </div>
+  </body>
+</html>
