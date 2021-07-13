@@ -22,6 +22,9 @@ const sharedState = {
   users: [],
   baseCss: "",
   usersCss: "",
+  serverId: "<INSERT SERVER ID>",
+  vcId: "<INSERT VC ID>",
+  overlayHeight: 0,
 };
 
 function generateUsersCss(users) {
@@ -49,9 +52,14 @@ Vue.component("app-container", {
   props: [],
   template: `
     <div class="app-container">
+      <div class="title">Discord Overlay Generator</div>
+
+      <div class="category-title">Add User</div>
       <user-input></user-input>
       <overlay-preview></overlay-preview>
-      <css-output></css-output>
+
+      <div class="category-title">Config</div>
+      <overlay-config></overlay-config>
     </div>
   `,
 });
@@ -118,21 +126,6 @@ Vue.component("overlay-preview", {
       const userStyles = document.getElementById("user-styles");
       userStyles.innerHTML = generateUsersCss(this.users);
     },
-    animateUsers() {
-      Array.from(document.getElementsByClassName("avatar")).forEach((el) => {
-        if (!document.body.classList.contains("speaking")) {
-          el.classList.add("speaking");
-        }
-      });
-
-      setTimeout(() => {
-        Array.from(document.getElementsByClassName("speaking")).forEach(
-          (el) => {
-            el.classList.remove("speaking");
-          }
-        );
-      }, 2000);
-    },
     removeUser(id) {
       const index = this.users.findIndex((user) => user.obj_id == id);
       if (index === -1) return;
@@ -147,7 +140,7 @@ Vue.component("overlay-preview", {
     this.updateUserClasses();
   },
   template: `
-    <div class="overlay-preview">
+    <div class="overlay-preview" id="overlay-preview">
       <div class="voice-container">
         <ul class="voice-states">
           <li
@@ -155,12 +148,7 @@ Vue.component("overlay-preview", {
             v-for="user in users"
             :data-reactid="user.id"
           >
-            <img
-              class="avatar"
-              src="https://www.programmingr.com/wp-content/uploads/2020/07/error-message.png"
-              :data-reactid="user.id"
-              :title="user.id"
-            />
+            <user-avatar :user="user"></user-avatar>
 
             <div class="remove-user-button" v-on:click="removeUser(user.obj_id)">
               <svg
@@ -186,12 +174,33 @@ Vue.component("overlay-preview", {
   `,
 });
 
-Vue.component("css-output", {
+Vue.component("user-avatar", {
+  props: ["user"],
+  data: () => ({
+    isHovering: false,
+  }),
+  template: `
+    <img
+      class="avatar"
+      src="https://www.programmingr.com/wp-content/uploads/2020/07/error-message.png"
+      :data-reactid="user.id"
+      :title="user.id"
+      @mouseover="isHovering = true" 
+      @mouseout="isHovering = false" 
+      :class="{speaking: isHovering}"
+    />
+  `,
+});
+
+Vue.component("overlay-config", {
   data: () => sharedState,
   methods: {
-    selectText() {
+    update(e) {
+      this[e.target.id] = e.target.value;
+    },
+    selectText(e) {
       var sel, range;
-      var el = document.getElementById("css-output"); //get element id
+      var el = e.target; //get element id
       if (window.getSelection && document.createRange) {
         //Browser compatibility
         sel = window.getSelection();
@@ -223,6 +232,9 @@ Vue.component("css-output", {
     fetch("./overlay.css")
       .then((res) => res.text())
       .then((baseCss) => (this.baseCss = baseCss));
+
+    this.overlayHeight =
+      document.getElementById("overlay-preview").clientHeight;
     this.updateUserClasses();
   },
   updated() {
@@ -234,8 +246,33 @@ Vue.component("css-output", {
     },
   },
   template: `
-    <div class="css-output" id="css-output" v-on:click="selectText">
-      {{ baseCss }} {{ usersCss }}
+    <div class="overlay-config">
+      <div class="user-input-box">
+        <div class="user-input-label">Server ID</div>
+        <input class="user-input" type="text" id="serverId" @input="update" />
+      </div>
+
+      <div class="user-input-box">
+        <div class="user-input-label">VC ID</div>
+        <input class="user-input" type="text" id="vcId" @input="update" />
+      </div>
+
+      <div class="congifs">
+        <div class="config-box">
+          <div class="config-label">URL</div>
+          <div class="config-data" v-on:click="selectText">https://streamkit.discord.com/overlay/voice/{{serverId}}/{{vcId}}</div>
+        </div>
+
+        <div class="config-box">
+          <div class="config-label">Height</div>
+          <div class="config-data" v-on:click="selectText">{{overlayHeight}}</div>
+        </div>
+
+        <div class="config-box">
+          <div class="config-label">Custom CSS</div>
+          <div class="config-data" v-on:click="selectText">{{baseCss}} {{ usersCss }}</div>
+        </div>
+      </div>
     </div>
   `,
 });

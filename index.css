@@ -11,6 +11,13 @@ body {
   display: flex;
   flex-direction: row;
   justify-content: center;
+  max-width: 100%;
+}
+
+#app {
+  width: 100%;
+  max-width: 1300px;
+  position: relative;
 }
 
 .app-container {
@@ -21,63 +28,7 @@ body {
   justify-content: flex-start;
 }
 
-/* Overlay Preview */
-
-.overlay-preview {
-  border: 2px solid var(--bg-faded);
-  margin-top: 32px;
-  max-width: 100%;
-  overflow-y: auto;
-  background-image: url(https://images.hdqwalls.com/download/blue-cityscape-minimalist-r1-2560x1440.jpg);
-  background-repeat: repeat-x;
-  background-size: contain;
-  padding: 0px 16px;
-  border-radius: 4px;
-  min-height: 166px;
-  /* animation: scroll-background 30s linear infinite; */
-}
-
-.remove-user-button {
-  position: absolute;
-  top: 0px;
-  right: 0px;
-  z-index: 1000;
-  cursor: pointer;
-  user-select: none;
-  stroke: #b72222;
-}
-
-@keyframes scroll-background {
-  0% {
-    background-position: 0% 0%;
-  }
-
-  50% {
-    background-position: 100% 0%;
-  }
-
-  100% {
-    background-position: 200% 0%;
-  }
-}
-
-/* ---------- */
-
-.css-output {
-  border: 2px solid var(--primary);
-  background-color: var(--bg);
-  color: white;
-  border-radius: 4px;
-  padding: 16px;
-  margin-top: 32px;
-  max-height: 40vh;
-  overflow-y: auto;
-  font-family: Consolas;
-  font-size: 12px;
-  overflow-wrap: break-word;
-  text-align: justify;
-}
-
+/* Form */
 .user-form {
   width: 100%;
   position: relative;
@@ -86,6 +37,7 @@ body {
   flex-direction: column;
   align-items: flex-start;
   justify-content: flex-start;
+  box-sizing: border-box;
 }
 
 .user-inputs {
@@ -144,7 +96,7 @@ body {
   padding: 4px 0px;
   color: white;
   cursor: pointer;
-  transition: color .125s, background-color .125s;
+  transition: color 0.125s, background-color 0.125s;
 }
 
 .user-form-button:hover {
@@ -155,6 +107,117 @@ body {
   background-color: var(--primary);
 }
 
-.avatar {
-  cursor: help;
+/* Overlay Preview */
+.overlay-preview {
+  border: 2px solid var(--bg-faded);
+  margin-top: 32px;
+  width: 100%;
+  max-width: 100%;
+  overflow-y: auto;
+  background-image: url(https://images.hdqwalls.com/download/blue-cityscape-minimalist-r1-2560x1440.jpg);
+  background-repeat: repeat-x;
+  background-size: contain;
+  border-radius: 4px;
+  min-height: 166px;
+  box-sizing: border-box;
+  padding: 0px 16px;
+  margin-bottom: 32px;
+  /* animation: scroll-background 30s linear infinite; */
+}
+
+.remove-user-button {
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  z-index: 1000;
+  cursor: pointer;
+  user-select: none;
+  stroke: #b72222;
+}
+
+@keyframes scroll-background {
+  0% {
+    background-position: 0% 0%;
+  }
+
+  50% {
+    background-position: 100% 0%;
+  }
+
+  100% {
+    background-position: 200% 0%;
+  }
+}
+
+/* Config */
+.overlay-config {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.congifs {
+  margin-top: 16px;
+  border: 2px solid var(--bg-faded);
+  padding: 16px;
+  border-radius: 4px;
+}
+
+.config-box {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.config-box:last-child {
+  margin-bottom: 0px;
+}
+
+.config-label {
+  flex-grow: 10;
+  width: 125px;
+  padding: 4px 8px;
+  font-weight: 700;
+  font-family: Consolas;
+  /* background-color: var(--primary); */
+  color: white;
+}
+
+.config-data {
+  width: 100%;
+  border-radius: 4px;
+  color: white;
+  font-family: Consolas;
+  font-weight: 500;
+  border: 2px solid var(--primary);
+  padding: 4px 8px;
+  max-height: 200px;
+  overflow-y: auto;
+  overflow-wrap: break-word;
+}
+
+
+/* Misc */
+.title {
+  width: 100%;
+  text-align: center;
+  font-weight: 700;
+  font-family: Consolas;
+  color: white;
+  font-size: 32px;
+  margin-bottom: 32px;
+}
+
+.category-title {
+  width: 100%;
+  text-align: left;
+  font-weight: 700;
+  font-family: Consolas;
+  color: white;
+  font-size: 26px;
+  margin-bottom: 16px;
 }
