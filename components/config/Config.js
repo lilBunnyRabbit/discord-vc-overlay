@@ -62,7 +62,7 @@ export const Config = (sharedState) =>
         .then((baseCss) => (this.baseCss = baseCss));
 
       this.overlayHeight =
-        document.getElementById("overlay-preview").clientHeight;
+        document.getElementById("overlay-preview").offsetHeight;
       this.updateUserClasses();
     },
     updated() {
