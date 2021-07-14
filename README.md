@@ -1,2 +1,2 @@
 # [Discord Overlay Generator](https://lilbunnyrabbit.github.io/discord-vc-overlay/)
-A Discord character voice chat overlay generator for OBS. 
+Generates CSS that edits [Streamkit Overlay](https://streamkit.discord.com/overlay) for OBS. It allows you to create "characters" for each person.
