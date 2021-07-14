@@ -1,4 +1,5 @@
 import { Config } from "./components/config/Config.js";
+import { ImportExport } from "./components/import-export/ImportExport.js";
 import { OverlayPreview } from "./components/overlay-preview/OverlayPreview.js";
 import { UserInput } from "./components/user-input/UserInput.js";
 
@@ -19,6 +20,7 @@ const exampleUsers = [
   },
 ];
 
+// State
 export const sharedState = {
   users: [],
   baseCss: "",
@@ -28,10 +30,13 @@ export const sharedState = {
   overlayHeight: 0,
 };
 
+// Create components
 Config(sharedState);
 UserInput(sharedState);
 OverlayPreview(sharedState);
+ImportExport(sharedState);
 
+// Root component
 Vue.component("app-container", {
   props: [],
   template: `
@@ -44,6 +49,9 @@ Vue.component("app-container", {
 
       <div class="category-title">Config</div>
       <overlay-config></overlay-config>
+
+      <div class="category-title">Import / Export</div>
+      <import-export></import-export>
     </div>
   `,
 });

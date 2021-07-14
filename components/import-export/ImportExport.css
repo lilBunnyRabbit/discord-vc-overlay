@@ -1,0 +1,56 @@
+.import-export {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.export-button {
+  width: 100%;
+  border: 2px solid var(--primary);
+  background-color: var(--primary);
+  font-family: Consolas;
+  font-weight: 700;
+  font-size: 16px;
+  margin-top: 16px;
+  border-radius: 4px;
+  padding: 4px 0px;
+  color: white;
+  cursor: pointer;
+  transition: color 0.125s, background-color 0.125s;
+}
+
+.export-button:hover {
+  background-color: var(--bg-faded);
+}
+
+.export-button:active {
+  background-color: var(--primary);
+}
+
+.import-file-input {
+  width: 100%;
+  border: 2px solid var(--primary);
+  background-color: var(--primary);
+  font-family: Consolas;
+  font-weight: 700;
+  font-size: 16px;
+  margin-top: 16px;
+  border-radius: 4px;
+  padding: 4px 0px;
+  color: white;
+  cursor: pointer;
+  transition: color 0.125s, background-color 0.125s;
+  text-align: center;
+}
+
+.import-file-input:hover {
+  background-color: var(--bg-faded);
+}
+
+.import-file-input:active {
+  background-color: var(--primary);
+}
+
+.import-export-divider {
+  width: 32px;
+}
