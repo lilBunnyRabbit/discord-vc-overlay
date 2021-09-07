@@ -3,7 +3,7 @@ export function generateUsersCss(users) {
     .map((user) => {
       return `
     .voice-state[data-reactid*="${user.id}"] {
-      display: flex;
+      display: flex !important;
       margin-right: 6px;
     }
     

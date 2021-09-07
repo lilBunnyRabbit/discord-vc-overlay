@@ -10,7 +10,7 @@
 }
 
 .voice-state {
-  display: none;  /* Remove if you want default users */
+  display: none !important;  /* Remove if you want default users */
   margin-bottom: 0px !important;
   margin-right: 6px;
   display: flex;
