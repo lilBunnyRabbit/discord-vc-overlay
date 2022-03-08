@@ -1,0 +1,53 @@
+.voice-states {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  padding-left: 0px !important;
+  margin-top: 16px;
+  margin-bottom: 0px;
+  margin-left: 0px;
+  margin-right: 0px;
+}
+
+.voice-state {
+  margin-bottom: 0px !important;
+  margin-right: 6px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  width: fit-content;
+  height: 150px !important;
+  position: relative;
+}
+
+.avatar {
+  height: 100% !important;
+  width: auto !important;
+  max-width: 150px;
+  margin-right: 0px !important;
+  float: none !important;
+  border-radius: 0px !important;
+  position: relative !important;
+  filter: brightness(40%);
+  object-fit: contain;
+  border: 0px !important;
+}
+
+.speaking {
+  animation-name: speaking-animation;
+  animation-duration: 1.5s;
+  animation-fill-mode: forwards;
+  animation-iteration-count: infinite;
+  border-color: rgba(0, 0, 0, 0) !important;
+  filter: brightness(100%);
+}
+
+@keyframes speaking-animation {
+  0% { bottom: 0px; }
+  15% { bottom: 10px; }
+  30% { bottom: 0px; }
+}
+
+.user {
+  display: none;
+}
