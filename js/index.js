@@ -45,32 +45,14 @@ class App {
     this.init();
   }
 
-  // INIT
+  // Init
   async init() {
     this.#baseCss = await fetch("./css/overlay.css").then((res) => res.text());
 
     this.initStates();
-    Object.keys(this.#state).forEach((key) => console.log({ [key]: this.#state[key].get() }));
     this.addHandlers();
     this.initElements();
-
-    this.#state.defaultUser.set({
-      url: "https://cdn.discordapp.com/attachments/424969467697823755/950531727628070982/lilbunnyrabbit_talking.png",
-      urlSpeaking:
-        "https://cdn.discordapp.com/attachments/424969467697823755/950531727628070982/lilbunnyrabbit_talking.png",
-    });
-    this.#state.users.set([
-      {
-        id: "134",
-        url: "https://cdn.discordapp.com/attachments/424969467697823755/950185675196616794/potate_normal.png",
-        urlSpeaking: "https://cdn.discordapp.com/attachments/424969467697823755/950185675683151872/potate_talking.png",
-      },
-      {
-        id: "1345",
-        url: "https://cdn.discordapp.com/attachments/424969467697823755/950531709567369276/lax_talking.png",
-        urlSpeaking: "https://cdn.discordapp.com/attachments/424969467697823755/950531710423015465/lax_normal.png",
-      },
-    ]);
+    this.handleUsers();
   }
 
   initStates() {
@@ -144,14 +126,23 @@ class App {
 
     input.config.serverId.oninput = (e) => {
       let serverId = e.target.value.trim();
-      if (serverId.length === 0) serverId = "";
-      this.#state.server.update({ serverId });
+      if (serverId.length === 0) {
+        const server = this.#state.server.get();
+        delete server.serverId;
+        this.#state.server.set(server);
+      } else {
+        this.#state.server.update({ serverId });
+      }
     };
-
     input.config.vcId.oninput = (e) => {
       let vcId = e.target.value.trim();
-      if (vcId.length === 0) vcId = "";
-      this.#state.server.update({ vcId });
+      if (vcId.length === 0) {
+        const server = this.#state.server.get();
+        delete server.vcId;
+        this.#state.server.set(server);
+      } else {
+        this.#state.server.update({ vcId });
+      }
     };
 
     config.url.onclick = this.selectText.bind(this);
@@ -165,6 +156,7 @@ class App {
     };
     buttons.reset.onclick = this.handleReset.bind(this);
     buttons.import.onchange = this.handleImport.bind(this);
+    buttons.export.onclick = this.handleExport.bind(this);
   }
 
   initElements() {
@@ -223,12 +215,11 @@ class App {
       return element;
     };
 
-    console.log({ users });
     voiceStates.innerHTML = "";
     if (defaultUser) voiceStates.appendChild(createUser(defaultUser));
     users.forEach((user) => voiceStates.appendChild(createUser(user)));
 
-    this.handleUpdateCss(null, users);
+    this.handleUpdateCss(defaultUser, users);
   }
 
   handleServer(server) {
@@ -296,14 +287,61 @@ class App {
       if (Object.keys(server).length > 0) this.#state.server.set(server);
 
       if (content.users) {
-        this.#state.users.set(content.users.map((user) => ({
-          id: user.id, 
-          url: user.url,
-          urlSpeaking: user.url_speaking
-        })));
+        this.#state.users.set(
+          content.users.map((user) => ({
+            id: user.id,
+            url: user.url,
+            urlSpeaking: user.url_speaking,
+          }))
+        );
       }
     } else if (file.name.endsWith(".dvog")) {
-      
+      if (content.defaultUser && Object.keys(content.defaultUser).length > 0) {
+        this.#state.defaultUser.set(content.defaultUser);
+      }
+
+      if (content.users && content.users.length > 0) {
+        this.#state.users.set(content.users);
+      }
+
+      if (content.server && Object.keys(content.server).length > 0) {
+        this.#state.server.set(content.server);
+      }
+    }
+  }
+
+  handleExport() {
+    const filename = `discord-vc-overlay-${new Date().toJSON().slice(0, 10)}.dvog`;
+    const data = {};
+
+    {
+      const defaultUser = this.#state.defaultUser.get();
+      if (defaultUser && Object.keys(defaultUser).length > 0) data.defaultUser = defaultUser;
+  
+      const users = this.#state.users.get();
+      if (users && users.length > 0) data.users = users;
+  
+      const server = this.#state.server.get();
+      if (server && Object.keys(server).length > 0) data.server = server;
+    }
+
+    const file = new Blob([JSON.stringify(data)], { type: "application/json" });
+
+    if (window.navigator.msSaveOrOpenBlob) {
+      window.navigator.msSaveOrOpenBlob(file, filename);
+    } else {
+      const a = document.createElement("a");
+      const url = URL.createObjectURL(file);
+
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+
+      setTimeout(() => {
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      }, 0);
     }
   }
 

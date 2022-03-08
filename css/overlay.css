@@ -10,6 +10,7 @@
 }
 
 .voice-state {
+  display: none !important;
   margin-bottom: 0px !important;
   margin-right: 6px;
   display: flex;
@@ -28,7 +29,7 @@
   float: none !important;
   border-radius: 0px !important;
   position: relative !important;
-  filter: brightness(40%);
+  filter: brightness(50%);
   object-fit: contain;
   border: 0px !important;
 }
