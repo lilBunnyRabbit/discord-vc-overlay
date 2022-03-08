@@ -91,6 +91,9 @@ body {
   font-family: Roboto-Regular;
   font-size: 14px;
   box-sizing: border-box;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 input[type="text"] {
