@@ -86,6 +86,13 @@ input[type="text"] {
   border-radius: 0px 4px 4px 0px;
 }
 
+.button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.button,
 button {
   outline: none;
   border: none;
@@ -99,14 +106,17 @@ button {
   transition: background 250ms;
 }
 
+.button:hover,
 button:hover {
   background: var(--primary);
 }
 
+.button[data-type="error"]:hover,
 button[data-type="error"]:hover {
   background: var(--error) !important;
 }
 
+.button:active,
 button:active {
   filter: brightness(110%);
 }
@@ -179,6 +189,7 @@ button:active {
   width: 100%;
 }
 
+.button-row > .button,
 .button-row > button {
   width: 100%;
 }

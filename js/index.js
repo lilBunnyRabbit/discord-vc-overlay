@@ -163,8 +163,8 @@ class App {
         this.#state.defaultUser.set(null);
       }
     };
-
     buttons.reset.onclick = this.handleReset.bind(this);
+    buttons.import.onchange = this.handleImport.bind(this);
   }
 
   initElements() {
@@ -172,8 +172,6 @@ class App {
     {
       const server = this.#state.server.get();
       this.handleServer(server);
-      if (server.serverId) input.config.serverId.value = server.serverId;
-      if (server.vcId) input.config.vcId.value = server.vcId;
     }
   }
 
@@ -234,6 +232,14 @@ class App {
   }
 
   handleServer(server) {
+    if (server.serverId && input.config.serverId.value !== server.serverId) {
+      input.config.serverId.value = server.serverId;
+    }
+
+    if (server.vcId && input.config.vcId.value !== server.vcId) {
+      input.config.vcId.value = server.vcId;
+    }
+
     let serverId = server.serverId;
     if (!serverId || serverId.length === 0) serverId = "<SERVER ID>";
     let vcId = server.vcId;
@@ -256,6 +262,49 @@ class App {
     this.#state.defaultUser.set(null);
     this.#state.server.set({});
     this.#state.users.set([]);
+  }
+
+  async handleImport(e) {
+    const input = e.target;
+    if (!input || !input["files"] || input.files.length === 0) return;
+
+    const readFile = async (file) => {
+      const reader = new FileReader();
+      return new Promise((resolve, reject) => {
+        reader.onload = (event) => {
+          try {
+            resolve(JSON.parse(event.target.result));
+          } catch (error) {
+            reject(null);
+          }
+        };
+        reader.onerror = (error) => reject(error);
+        reader.readAsText(file);
+      });
+    };
+
+    const file = input.files[0];
+    if (!file.name.endsWith(".dvco") && !file.name.endsWith(".dvog")) return;
+    const content = await readFile(file).catch(() => null);
+    if (!content) return;
+
+    // Support for older version
+    if (file.name.endsWith(".dvco")) {
+      const server = {};
+      if (content.serverId) server.serverId = content.serverId;
+      if (content.vcId) server.vcId = content.vcId;
+      if (Object.keys(server).length > 0) this.#state.server.set(server);
+
+      if (content.users) {
+        this.#state.users.set(content.users.map((user) => ({
+          id: user.id, 
+          url: user.url,
+          urlSpeaking: user.url_speaking
+        })));
+      }
+    } else if (file.name.endsWith(".dvog")) {
+      
+    }
   }
 
   // Misc

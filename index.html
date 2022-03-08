@@ -56,9 +56,7 @@
         <div class="section-title">Preview</div>
         <div class="preview" id="preview">
           <div class="voice-container">
-            <ul class="voice-states" id="voice-states">
-
-            </ul>
+            <ul class="voice-states" id="voice-states"></ul>
           </div>
         </div>
       </div>
@@ -93,7 +91,8 @@
       <div class="section">
         <div class="section-title">Import / Export</div>
         <div class="button-row">
-          <button id="import-button">Import</button>
+          <label for="import-button" class="button">Import</label>
+          <input type="file" id="import-button" accept=".dvco,.dvog" style="display: none" />
           <button id="export-button">Export</button>
         </div>
         <button id="reset-button" data-type="error">Reset</button>
