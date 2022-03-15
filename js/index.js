@@ -253,6 +253,9 @@ class App {
     this.#state.defaultUser.set(null);
     this.#state.server.set({});
     this.#state.users.set([]);
+
+    input.config.serverId.value = "";
+    input.config.vcId.value = "";
   }
 
   async handleImport(e) {
@@ -278,6 +281,8 @@ class App {
     if (!file.name.endsWith(".dvco") && !file.name.endsWith(".dvog")) return;
     const content = await readFile(file).catch(() => null);
     if (!content) return;
+
+    this.handleReset();
 
     // Support for older version
     if (file.name.endsWith(".dvco")) {
@@ -351,7 +356,7 @@ class App {
     if (!users) users = this.#state.users.get();
 
     let defaultCss = "";
-    if (defaultUser) {
+    if (defaultUser && Object.keys(defaultUser).length > 0) {
       defaultCss = `
       .voice-state {
         display: flex !important;
