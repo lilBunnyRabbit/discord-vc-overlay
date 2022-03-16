@@ -210,6 +210,8 @@ class App {
         xButon.onclick = () => this.handleRemoveUser(user.id);
         xButon.title = `Remove user "${user.id}"`;
         element.appendChild(xButon);
+
+        avatar.addEventListener("click", () => this.copyToClipboard(`<@${user.id}>`));
       }
 
       return element;
@@ -416,6 +418,14 @@ class App {
         range.moveToElementText(e.target);
         range.select();
       }
+    }
+  }
+
+  async copyToClipboard(text) {
+    try {
+      return navigator.clipboard.writeText(text);
+    } catch (error) {
+      console.error(error)
     }
   }
 }
