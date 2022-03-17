@@ -239,6 +239,7 @@ button:active {
   font-family: RobotoMono-Regular;
   display: flex;
   gap: 8px;
+  cursor: default;
 }
 
 .user-editor-info-dimensions > div:first-child {

@@ -97,7 +97,7 @@ class App {
       urlElement.value = "";
       urlSpeakingElement.value = "";
 
-      this.#state.defaultUser.set({ url, urlSpeaking });
+      this.setDefaultUser({ url, urlSpeaking });
     };
 
     form.addUser.onsubmit = (e) => {
@@ -116,46 +116,21 @@ class App {
       userUrlElement.value = "";
       userUrlSpeakingElement.value = "";
 
-      const users = this.#state.users.get();
-      users.push({
+      this.addUser({
         id: userId,
         url: userUrl,
         urlSpeaking: userUrlSpeaking,
       });
-
-      this.#state.users.set(users);
     };
 
-    input.config.serverId.oninput = (e) => {
-      let serverId = e.target.value.trim();
-      if (serverId.length === 0) {
-        const server = this.#state.server.get();
-        delete server.serverId;
-        this.#state.server.set(server);
-      } else {
-        this.#state.server.update({ serverId });
-      }
-    };
-    input.config.vcId.oninput = (e) => {
-      let vcId = e.target.value.trim();
-      if (vcId.length === 0) {
-        const server = this.#state.server.get();
-        delete server.vcId;
-        this.#state.server.set(server);
-      } else {
-        this.#state.server.update({ vcId });
-      }
-    };
+    input.config.serverId.oninput = (e) => this.setServerId(e.target.value.trim());
+    input.config.vcId.oninput = (e) => this.setVcId(e.target.value.trim());
 
     config.url.onclick = this.selectText.bind(this);
     config.height.onclick = this.selectText.bind(this);
     config.customCss.onclick = this.selectText.bind(this);
 
-    buttons.removeDefaultUser.onclick = () => {
-      if (this.#state.defaultUser.get()) {
-        this.#state.defaultUser.set(null);
-      }
-    };
+    buttons.removeDefaultUser.onclick = () => this.removeDefaultUser();
     buttons.reset.onclick = this.handleReset.bind(this);
     buttons.import.onchange = this.handleImport.bind(this);
     buttons.export.onclick = this.handleExport.bind(this);
@@ -163,10 +138,7 @@ class App {
 
   initElements() {
     config.height.innerText = preview.offsetHeight;
-    {
-      const server = this.#state.server.get();
-      this.handleServer(server);
-    }
+    this.handleServer(this.#state.server.get());
   }
 
   // Handlers
@@ -174,171 +146,12 @@ class App {
     if (!defaultUser) defaultUser = this.#state.defaultUser.get();
     if (!users) users = this.#state.users.get();
 
-    const createUser = (user) => {
-      const element = document.createElement("li");
-      element.className = "voice-state";
-      if (user.id) element.setAttribute("data-reactid", user.id);
+    users = this.sortUsers(users);
 
-      const avatar = document.createElement("img");
-      avatar.className = "avatar";
-      if (user.id) avatar.setAttribute("data-reactid", user.id);
-      avatar.title = user.id || "default";
+    this.updateEditor(defaultUser, users);
+    this.updatePreview(defaultUser, users);
 
-      avatar.onmouseenter = () => !avatar.classList.contains("speaking") && avatar.classList.add("speaking");
-      avatar.onmouseleave = () => avatar.classList.contains("speaking") && avatar.classList.remove("speaking");
-      element.appendChild(avatar);
-
-      if (user.id) {
-        avatar.addEventListener("click", () => this.copyToClipboard(`<@${user.id}>`));
-      }
-
-      return element;
-    };
-
-    voiceStates.innerHTML = "";
-    if (defaultUser) voiceStates.appendChild(createUser(defaultUser));
-    users.forEach((user) => voiceStates.appendChild(createUser(user)));
-
-    this.handleUpdateUserPreview(defaultUser, users);
-
-    this.handleUpdateCss(defaultUser, users);
-  }
-
-  handleUpdateUserPreview(defaultUser, users) {
-    const createUser = (user) => {
-      const form = HTML("form", {
-        className: "form",
-        children: [
-          HTML("div", {
-            className: "form-input",
-            children: [HTML("div", { innerText: "URL" }), HTML("input", { type: "text" })],
-          }),
-          HTML("div", {
-            className: "form-input",
-            children: [HTML("div", { innerText: "URL Speaking" }), HTML("input", { type: "text" })],
-          }),
-          HTML("div", {
-            className: "button-row",
-            children: [
-              HTML("button", {
-                type: "submit",
-                innerText: "Update user",
-              }),
-              HTML("button", {
-                className: "error",
-                type: "button",
-                innerText: "Remove user",
-                onclick: () => {
-                  this.handleRemoveUser(user.id);
-                },
-              }),
-            ],
-          }),
-        ],
-      });
-
-      form.onsubmit = (e) => {
-        e.preventDefault();
-        const userUrlElement = e.target.elements[0];
-        const userUrlSpeakingElement = e.target.elements[1];
-
-        const userUrl = userUrlElement.value.trim();
-        const userUrlSpeaking = userUrlSpeakingElement.value.trim();
-
-        const userData = {};
-
-        if (userUrl.length > 0) {
-          userUrlElement.value = "";
-          userData.url = userUrl;
-        }
-
-        if (userUrlSpeaking.length > 0) {
-          userUrlSpeakingElement.value = "";
-          userData.urlSpeaking = userUrlSpeaking;
-        }
-
-        if (Object.keys(userData).length === 0) return;
-
-        let newUsers = this.#state.users.get();
-        newUsers = newUsers.map((u) => {
-          if (u.id !== user.id) return u;
-          return {
-            ...u,
-            ...userData,
-          };
-        });
-
-        this.#state.users.set(newUsers);
-      };
-
-      const normalDimensions = HTML("div", { innerText: "" });
-      const speakingDimensions = HTML("div", { innerText: "" });
-
-      const dimensions = {};
-
-      const checkDimensions = () => {
-        if (!dimensions.normal || !dimensions.speaking) return;
-        if (
-          dimensions.normal.width !== dimensions.speaking.width ||
-          dimensions.normal.height !== dimensions.speaking.height
-        ) {
-          speakingDimensions.innerText += " ❌";
-        } else {
-          speakingDimensions.innerText += " ✔️";
-        }
-      };
-
-      return HTML("div", {
-        className: "user-editor-box",
-        children: [
-          HTML("div", {
-            className: "user-editor-avatars",
-            children: [
-              HTML("img", {
-                className: "user-editor-avatar",
-                src: user.url,
-                onload: (e) => {
-                  const dimensionsText = `${e.target.naturalWidth} x ${e.target.naturalHeight}`;
-                  e.target.title = dimensionsText;
-                  normalDimensions.innerText = `Normal: ${dimensionsText}`;
-                  dimensions.normal = { width: e.target.naturalWidth, height: e.target.naturalHeight };
-                  checkDimensions();
-                },
-              }),
-              HTML("img", {
-                className: "user-editor-avatar",
-                src: user.urlSpeaking,
-                onload: (e) => {
-                  const dimensionsText = `${e.target.naturalWidth} x ${e.target.naturalHeight}`;
-                  e.target.title = dimensionsText;
-                  speakingDimensions.innerText = `Speaking: ${dimensionsText}`;
-                  dimensions.speaking = { width: e.target.naturalWidth, height: e.target.naturalHeight };
-                  checkDimensions();
-                },
-              }),
-            ],
-          }),
-          HTML("div", {
-            className: "user-editor-info",
-            children: [
-              HTML("div", {
-                className: "user-editor-info-title",
-                innerText: user.id,
-                onclick: () => this.copyToClipboard(`<@${user.id}>`),
-              }),
-              HTML("div", {
-                className: "user-editor-info-dimensions",
-                children: [normalDimensions, speakingDimensions],
-              }),
-              form,
-            ],
-          }),
-        ],
-      });
-    };
-
-    userEditor.innerHTML = "";
-    users.forEach((user) => userEditor.appendChild(createUser(user)));
+    this.updateCss(defaultUser, users);
   }
 
   handleServer(server) {
@@ -355,17 +168,6 @@ class App {
     let vcId = server.vcId;
     if (!vcId || vcId.length === 0) vcId = "<VOICE CHAT ID>";
     config.url.innerText = `https://streamkit.discord.com/overlay/voice/${serverId}/${vcId}`;
-  }
-
-  handleRemoveUser(userId) {
-    const users = this.#state.users.get().filter(({ id }) => id !== userId);
-    this.#state.users.set(users);
-  }
-
-  handleUpdateCss(defaultUser, users) {
-    const customCss = this.generateCss(defaultUser, users);
-    style.innerHTML = customCss;
-    config.customCss.innerText = customCss;
   }
 
   handleReset() {
@@ -469,8 +271,252 @@ class App {
     }
   }
 
-  // Misc
-  generateCss(defaultUser, users) {
+  // Tools
+  setDefaultUser({ url, urlSpeaking }) {
+    this.#state.defaultUser.set({ url, urlSpeaking });
+  }
+
+  removeDefaultUser() {
+    if (this.#state.defaultUser.get()) {
+      this.#state.defaultUser.set(null);
+    }
+  }
+
+  updateDefaultUser(data) {
+    this.#state.defaultUser.update(data);
+  }
+
+  addUser({ id, url, urlSpeaking }) {
+    const users = this.#state.users.get();
+    users.push({
+      id,
+      url,
+      urlSpeaking,
+      date: new Date().toUTCString(),
+    });
+
+    this.#state.users.set(users);
+  }
+
+  removeUser(userId) {
+    const users = this.#state.users.get().filter(({ id }) => id !== userId);
+    this.#state.users.set(users);
+  }
+
+  updateUser(userId, data) {
+    let newUsers = this.#state.users.get();
+    newUsers = newUsers.map((user) => {
+      if (user.id !== userId) return user;
+      return {
+        ...user,
+        ...data,
+      };
+    });
+
+    this.#state.users.set(newUsers);
+  }
+
+  sortUsers(users) {
+    return users.sort((a, b) => {
+      if (a.date && b.date) {
+        return new Date(b.date) - new Date(a.date);
+      } else if (a.date) {
+        return -1;
+      } else if (b.date) {
+        return 1;
+      }
+
+      return a.id.localeCompare(b.id);
+    });
+  }
+
+  setServerId(serverId) {
+    if (serverId.length === 0) {
+      const server = this.#state.server.get();
+      delete server.serverId;
+      this.#state.server.set(server);
+    } else {
+      this.#state.server.update({ serverId });
+    }
+  }
+
+  setVcId(vcId) {
+    if (vcId.length === 0) {
+      const server = this.#state.server.get();
+      delete server.vcId;
+      this.#state.server.set(server);
+    } else {
+      this.#state.server.update({ vcId });
+    }
+  }
+
+  updateEditor(defaultUser, users) {
+    const createUser = (user) => {
+      const form = HTML("form", {
+        className: "form",
+        children: [
+          HTML("div", {
+            className: "form-input",
+            children: [HTML("div", { innerText: "URL" }), HTML("input", { type: "text" })],
+          }),
+          HTML("div", {
+            className: "form-input",
+            children: [HTML("div", { innerText: "URL Speaking" }), HTML("input", { type: "text" })],
+          }),
+          HTML("div", {
+            className: "button-row",
+            children: [
+              HTML("button", {
+                type: "submit",
+                innerText: "Update user",
+              }),
+              HTML("button", {
+                className: "error",
+                type: "button",
+                innerText: "Remove user",
+                onclick: () => {
+                  if (user.id) {
+                    this.removeUser(user.id);
+                  } else {
+                    this.removeDefaultUser();
+                  }
+                },
+              }),
+            ],
+          }),
+        ],
+      });
+
+      form.onsubmit = (e) => {
+        e.preventDefault();
+        const userUrlElement = e.target.elements[0];
+        const userUrlSpeakingElement = e.target.elements[1];
+
+        const userUrl = userUrlElement.value.trim();
+        const userUrlSpeaking = userUrlSpeakingElement.value.trim();
+
+        const userData = {};
+
+        if (userUrl.length > 0) {
+          userUrlElement.value = "";
+          userData.url = userUrl;
+        }
+
+        if (userUrlSpeaking.length > 0) {
+          userUrlSpeakingElement.value = "";
+          userData.urlSpeaking = userUrlSpeaking;
+        }
+
+        if (Object.keys(userData).length === 0) return;
+
+        if (user.id) {
+          this.updateUser(userId, userData);
+        } else {
+          this.updateDefaultUser(userData);
+        }
+      };
+
+      const normalDimensions = HTML("div", { innerText: "" });
+      const speakingDimensions = HTML("div", { innerText: "" });
+
+      const dimensions = {};
+
+      const checkDimensions = () => {
+        if (!dimensions.normal || !dimensions.speaking) return;
+        if (
+          dimensions.normal.width / dimensions.speaking.width ===
+          dimensions.normal.height / dimensions.speaking.height
+        ) {
+          speakingDimensions.innerText += " ✔️";
+        } else {
+          speakingDimensions.innerText += " ❌";
+          speakingDimensions.title = "Different ratios!";
+        }
+      };
+
+      return HTML("div", {
+        className: "user-editor-box",
+        children: [
+          HTML("div", {
+            className: "user-editor-avatars",
+            children: [
+              HTML("img", {
+                className: "user-editor-avatar",
+                src: user.url,
+                onload: (e) => {
+                  const dimensionsText = `${e.target.naturalWidth} x ${e.target.naturalHeight}`;
+                  e.target.title = dimensionsText;
+                  normalDimensions.innerText = `Normal: ${dimensionsText}`;
+                  dimensions.normal = { width: e.target.naturalWidth, height: e.target.naturalHeight };
+                  checkDimensions();
+                },
+              }),
+              HTML("img", {
+                className: "user-editor-avatar",
+                src: user.urlSpeaking,
+                onload: (e) => {
+                  const dimensionsText = `${e.target.naturalWidth} x ${e.target.naturalHeight}`;
+                  e.target.title = dimensionsText;
+                  speakingDimensions.innerText = `Speaking: ${dimensionsText}`;
+                  dimensions.speaking = { width: e.target.naturalWidth, height: e.target.naturalHeight };
+                  checkDimensions();
+                },
+              }),
+            ],
+          }),
+          HTML("div", {
+            className: "user-editor-info",
+            children: [
+              HTML("div", {
+                className: "user-editor-info-title",
+                innerText: user.id || "Default user",
+                onclick: () => user.id && this.copyToClipboard(`<@${user.id}>`),
+                title: user.id ? `Copy "<@${user.id}>"` : "Default user",
+              }),
+              HTML("div", {
+                className: "user-editor-info-dimensions",
+                children: [normalDimensions, speakingDimensions],
+              }),
+              form,
+            ],
+          }),
+        ],
+      });
+    };
+
+    userEditor.innerHTML = "";
+    if (defaultUser) userEditor.appendChild(createUser(defaultUser));
+    users.forEach((user) => userEditor.appendChild(createUser(user)));
+  }
+
+  updatePreview(defaultUser, users) {
+    const createUser = (user) => {
+      const element = document.createElement("li");
+      element.className = "voice-state";
+      if (user.id) element.setAttribute("data-reactid", user.id);
+
+      const avatar = document.createElement("img");
+      avatar.className = "avatar";
+      if (user.id) avatar.setAttribute("data-reactid", user.id);
+      avatar.title = user.id || "default";
+
+      avatar.onmouseenter = () => !avatar.classList.contains("speaking") && avatar.classList.add("speaking");
+      avatar.onmouseleave = () => avatar.classList.contains("speaking") && avatar.classList.remove("speaking");
+      element.appendChild(avatar);
+
+      if (user.id) {
+        avatar.addEventListener("click", () => this.copyToClipboard(`<@${user.id}>`));
+      }
+
+      return element;
+    };
+
+    voiceStates.innerHTML = "";
+    if (defaultUser) voiceStates.appendChild(createUser(defaultUser));
+    users.forEach((user) => voiceStates.appendChild(createUser(user)));
+  }
+
+  updateCss(defaultUser, users) {
     if (!defaultUser && users) defaultUser = this.#state.defaultUser.get();
     if (!users) users = this.#state.users.get();
 
@@ -490,7 +536,7 @@ class App {
       `;
     }
 
-    return (
+    const customCss = (
       this.#baseCss +
       defaultCss +
       users
@@ -508,12 +554,15 @@ class App {
         }
         `
         )
-        .join("")
+        .join(" ")
     )
       .replace(/(\r\n|\n|\r)/gm, "")
       .replace(/\s{2,}/g, " ");
+    style.innerHTML = customCss;
+    config.customCss.innerText = customCss;
   }
 
+  // Misc
   selectText(e) {
     if (window.getSelection && document.createRange) {
       const selection = window.getSelection();
