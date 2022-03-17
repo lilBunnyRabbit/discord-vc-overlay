@@ -1,3 +1,4 @@
+import { HTML } from "./htmlBuilder.js";
 import { State } from "./state.js";
 
 const style = document.getElementById("custom-css");
@@ -21,6 +22,7 @@ const config = {
 };
 
 const preview = document.getElementById("preview");
+const userEditor = document.getElementById("user-editor");
 const voiceStates = document.getElementById("voice-states");
 
 const buttons = {
@@ -187,30 +189,6 @@ class App {
       element.appendChild(avatar);
 
       if (user.id) {
-        const xButon = document.createElement("div");
-        xButon.className = "remove-user-button";
-        xButon.innerHTML = `
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          class="feather feather-x"
-        >
-          <line x1="18" y1="6" x2="6" y2="18"></line>
-          <line x1="6" y1="6" x2="18" y2="18"></line>
-        </svg>
-        `;
-
-        xButon.onclick = () => this.handleRemoveUser(user.id);
-        xButon.title = `Remove user "${user.id}"`;
-        element.appendChild(xButon);
-
         avatar.addEventListener("click", () => this.copyToClipboard(`<@${user.id}>`));
       }
 
@@ -221,7 +199,146 @@ class App {
     if (defaultUser) voiceStates.appendChild(createUser(defaultUser));
     users.forEach((user) => voiceStates.appendChild(createUser(user)));
 
+    this.handleUpdateUserPreview(defaultUser, users);
+
     this.handleUpdateCss(defaultUser, users);
+  }
+
+  handleUpdateUserPreview(defaultUser, users) {
+    const createUser = (user) => {
+      const form = HTML("form", {
+        className: "form",
+        children: [
+          HTML("div", {
+            className: "form-input",
+            children: [HTML("div", { innerText: "URL" }), HTML("input", { type: "text" })],
+          }),
+          HTML("div", {
+            className: "form-input",
+            children: [HTML("div", { innerText: "URL Speaking" }), HTML("input", { type: "text" })],
+          }),
+          HTML("div", {
+            className: "button-row",
+            children: [
+              HTML("button", {
+                type: "submit",
+                innerText: "Update user",
+              }),
+              HTML("button", {
+                className: "error",
+                type: "button",
+                innerText: "Remove user",
+                onclick: () => {
+                  this.handleRemoveUser(user.id);
+                },
+              }),
+            ],
+          }),
+        ],
+      });
+
+      form.onsubmit = (e) => {
+        e.preventDefault();
+        const userUrlElement = e.target.elements[0];
+        const userUrlSpeakingElement = e.target.elements[1];
+
+        const userUrl = userUrlElement.value.trim();
+        const userUrlSpeaking = userUrlSpeakingElement.value.trim();
+
+        const userData = {};
+
+        if (userUrl.length > 0) {
+          userUrlElement.value = "";
+          userData.url = userUrl;
+        }
+
+        if (userUrlSpeaking.length > 0) {
+          userUrlSpeakingElement.value = "";
+          userData.urlSpeaking = userUrlSpeaking;
+        }
+
+        if (Object.keys(userData).length === 0) return;
+
+        let newUsers = this.#state.users.get();
+        newUsers = newUsers.map((u) => {
+          if (u.id !== user.id) return u;
+          return {
+            ...u,
+            ...userData,
+          };
+        });
+
+        this.#state.users.set(newUsers);
+      };
+
+      const normalDimensions = HTML("div", { innerText: "" });
+      const speakingDimensions = HTML("div", { innerText: "" });
+
+      const dimensions = {};
+
+      const checkDimensions = () => {
+        if (!dimensions.normal || !dimensions.speaking) return;
+        if (
+          dimensions.normal.width !== dimensions.speaking.width ||
+          dimensions.normal.height !== dimensions.speaking.height
+        ) {
+          speakingDimensions.innerText += " ❌";
+        } else {
+          speakingDimensions.innerText += " ✔️";
+        }
+      };
+
+      return HTML("div", {
+        className: "user-editor-box",
+        children: [
+          HTML("div", {
+            className: "user-editor-avatars",
+            children: [
+              HTML("img", {
+                className: "user-editor-avatar",
+                src: user.url,
+                onload: (e) => {
+                  const dimensionsText = `${e.target.naturalWidth} x ${e.target.naturalHeight}`;
+                  e.target.title = dimensionsText;
+                  normalDimensions.innerText = `Normal: ${dimensionsText}`;
+                  dimensions.normal = { width: e.target.naturalWidth, height: e.target.naturalHeight };
+                  checkDimensions();
+                },
+              }),
+              HTML("img", {
+                className: "user-editor-avatar",
+                src: user.urlSpeaking,
+                onload: (e) => {
+                  const dimensionsText = `${e.target.naturalWidth} x ${e.target.naturalHeight}`;
+                  e.target.title = dimensionsText;
+                  speakingDimensions.innerText = `Speaking: ${dimensionsText}`;
+                  dimensions.speaking = { width: e.target.naturalWidth, height: e.target.naturalHeight };
+                  checkDimensions();
+                },
+              }),
+            ],
+          }),
+          HTML("div", {
+            className: "user-editor-info",
+            children: [
+              HTML("div", {
+                className: "user-editor-info-title",
+                innerText: user.id,
+                onclick: () => this.copyToClipboard(`<@${user.id}>`),
+              }),
+              HTML("div", {
+                className: "user-editor-info-dimensions",
+                children: [normalDimensions, speakingDimensions],
+              }),
+              form,
+            ],
+          }),
+        ],
+      });
+    };
+
+    userEditor.innerHTML = "";
+    users.forEach((user) => userEditor.appendChild(createUser(user)));
   }
 
   handleServer(server) {
@@ -324,10 +441,10 @@ class App {
     {
       const defaultUser = this.#state.defaultUser.get();
       if (defaultUser && Object.keys(defaultUser).length > 0) data.defaultUser = defaultUser;
-  
+
       const users = this.#state.users.get();
       if (users && users.length > 0) data.users = users;
-  
+
       const server = this.#state.server.get();
       if (server && Object.keys(server).length > 0) data.server = server;
     }
@@ -425,7 +542,7 @@ class App {
     try {
       return navigator.clipboard.writeText(text);
     } catch (error) {
-      console.error(error)
+      console.error(error);
     }
   }
 }
