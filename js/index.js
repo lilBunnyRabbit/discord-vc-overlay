@@ -556,7 +556,7 @@ class App {
         )
         .join(" ")
     )
-      .replace(/(\r\n|\n|\r)/gm, "")
+      .replace(/(\r\n|\n|\r)/gm, " ")
       .replace(/\s{2,}/g, " ");
     style.innerHTML = customCss;
     config.customCss.innerText = customCss;
