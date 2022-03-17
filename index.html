@@ -4,10 +4,10 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    
+
     <title>Discord Overlay Generator</title>
-    <meta property="og:title" content="Discord Overlay Generator">
-    <meta property="og:description" content="Helper for creating animate voice chat overlay for streamkit.">
+    <meta property="og:title" content="Discord Overlay Generator" />
+    <meta property="og:description" content="Helper for creating animate voice chat overlay for streamkit." />
 
     <!-- Global site tag (gtag.js) - Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-V8HYKKZTP6"></script>
@@ -118,6 +118,23 @@
         </div>
         <button id="reset-button" data-type="error">Reset</button>
       </div>
+      <div class="section">
+        <div class="section-title">Tools</div>
+        <div class="button-row">
+          <button
+            onclick="openPage(this)"
+            href="https://lilbunnyrabbit.github.io/static-utils/routes/image-crop/index.html"
+          >
+            Image crop
+          </button>
+        </div>
+      </div>
     </div>
+
+    <script>
+      function openPage(e) {
+        window.open(e.getAttribute("href"), "_blank");
+      }
+    </script>
   </body>
 </html>
