@@ -410,7 +410,7 @@ class App {
         if (Object.keys(userData).length === 0) return;
 
         if (user.id) {
-          this.updateUser(userId, userData);
+          this.updateUser(user.id, userData);
         } else {
           this.updateDefaultUser(userData);
         }
