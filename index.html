@@ -20,10 +20,10 @@
       gtag("config", "G-V8HYKKZTP6");
     </script>
 
-    <script src="./js/version.js" prefix="" version="2.1.0"></script>
+    <script src="./lib/version.js" prefix="" version="3.0.0"></script>
 
-    <link rel="stylesheet" href="./css/index.css" />
-    <script src="./js/index.js" type="module" defer></script>
+    <link rel="stylesheet" href="./src/css/index.css" />
+    <script src="./src/index.js" type="module" defer></script>
     <style id="custom-css"></style>
   </head>
   <body>
@@ -74,6 +74,16 @@
       </div>
 
       <div class="section">
+        <div class="section-title">Animation</div>
+        <select name="Animation select" id="animation-select" placeholder="Slect animation">
+          <option value="default">Default</option>
+          <option value="jumping">Jumping</option>
+          <option value="stepping-forward">Stepping forward</option>
+        </select>
+        <div class="animation-editor" id="animation-editor"></div>
+      </div>
+
+      <div class="section">
         <div class="section-title">Preview</div>
         <div class="preview" id="preview">
           <div class="voice-container">
@@ -109,6 +119,7 @@
           </div>
         </div>
       </div>
+
       <div class="section">
         <div class="section-title">Import / Export</div>
         <div class="button-row">

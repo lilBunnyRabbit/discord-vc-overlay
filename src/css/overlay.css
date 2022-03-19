@@ -29,24 +29,12 @@
   float: none !important;
   border-radius: 0px !important;
   position: relative !important;
-  filter: brightness(50%);
   object-fit: contain;
   border: 0px !important;
 }
 
 .speaking {
-  animation-name: speaking-animation;
-  animation-duration: 1.5s;
-  animation-fill-mode: forwards;
-  animation-iteration-count: infinite;
   border-color: rgba(0, 0, 0, 0) !important;
-  filter: brightness(100%);
-}
-
-@keyframes speaking-animation {
-  0% { bottom: 0px; }
-  15% { bottom: 10px; }
-  30% { bottom: 0px; }
 }
 
 .user {
