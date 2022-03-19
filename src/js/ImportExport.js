@@ -1,9 +1,8 @@
-export class ImportExport {
+import { States } from "../index.js";
+import { StateComponent } from "../../lib/state.js";
+
+export class ImportExport extends StateComponent {
   #app = null;
-  #states = {
-    users: null,
-    defaultUser: null,
-  };
   #elements = {
     import: document.getElementById("import-button"),
     export: document.getElementById("export-button"),
@@ -11,16 +10,14 @@ export class ImportExport {
   };
 
   constructor(app) {
+    super(AppState, [States.DEFAULT_USER, States.USERS, States.SERVER]);
+
     this.#app = app;
-    this.#states = {
-      users: AppState.attach("users"),
-      defaultUser: AppState.attach("defaultUser"),
-      server: AppState.attach("server"),
-    };
 
     this.#addHandlers();
   }
 
+  // Handlers
   #addHandlers() {
     this.#elements.reset.onclick = this.#handleReset.bind(this);
     this.#elements.import.onchange = this.#handleImport.bind(this);
@@ -61,10 +58,10 @@ export class ImportExport {
     const server = {};
     if (data.serverId) server.serverId = data.serverId;
     if (data.vcId) server.vcId = data.vcId;
-    if (Object.keys(server).length > 0) this.#states.server.set(server);
+    if (Object.keys(server).length > 0) this.states.server.set(server);
 
     if (data.users) {
-      this.#states.users.set(
+      this.states.users.set(
         data.users.map((user) => ({
           id: user.id,
           url: user.url,
@@ -76,15 +73,15 @@ export class ImportExport {
 
   #handleDVOG(data) {
     if (data.defaultUser && Object.keys(data.defaultUser).length > 0) {
-      this.#states.defaultUser.set(data.defaultUser);
+      this.states.defaultUser.set(data.defaultUser);
     }
 
     if (data.users && data.users.length > 0) {
-      this.#states.users.set(data.users);
+      this.states.users.set(data.users);
     }
 
     if (data.server && Object.keys(data.server).length > 0) {
-      this.#states.server.set(data.server);
+      this.states.server.set(data.server);
     }
   }
 
@@ -93,13 +90,13 @@ export class ImportExport {
     const data = {};
 
     {
-      const defaultUser = this.#states.defaultUser.get();
+      const defaultUser = this.states.defaultUser.get();
       if (defaultUser && Object.keys(defaultUser).length > 0) data.defaultUser = defaultUser;
 
-      const users = this.#states.users.get();
+      const users = this.states.users.get();
       if (users && users.length > 0) data.users = users;
 
-      const server = this.#states.server.get();
+      const server = this.states.server.get();
       if (server && Object.keys(server).length > 0) data.server = server;
     }
 
@@ -124,6 +121,6 @@ export class ImportExport {
   }
 
   #handleReset() {
-    this.#app.resetState();
+    this.#app.$resetAll();
   }
 }

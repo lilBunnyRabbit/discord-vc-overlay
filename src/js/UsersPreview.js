@@ -1,27 +1,28 @@
+import { States } from "../index.js";
+import { StateComponent } from "../../lib/state.js";
 import { HTML } from "../../lib/htmlBuilder.js";
+import { copyToClipboard } from "./utils.js";
 
-export class UsersPreview {
-  #app = null;
-  #states = {
-    users: null,
-    defaultUser: null,
-  };
+export class UsersPreview extends StateComponent {
   #elements = {
     voiceStates: document.getElementById("voice-states"),
   };
 
-  constructor(app) {
-    this.#app = app;
-    this.#states = {
-      users: AppState.attach("users").addListener((users) => {
-        this.#updatePreview(this.#states.defaultUser.get(), users);
-      }),
-      defaultUser: AppState.attach("defaultUser").addListener((defaultUser) => {
-        this.#updatePreview(defaultUser, this.#states.users.get());
-      }),
-    };
+  constructor() {
+    super(AppState, [States.DEFAULT_USER, States.USERS]);
 
-    this.#updatePreview(this.#states.defaultUser.get(), this.#states.users.get());
+    this.#updatePreview(this.states.defaultUser.get(), this.states.users.get());
+  }
+
+  $onStateChange(key, value) {
+    switch (key) {
+      case States.DEFAULT_USER:
+        return this.#updatePreview(value, this.states.users.get());
+      case States.USERS:
+        return this.#updatePreview(this.states.defaultUser.get(), value);
+      default:
+        return;
+    }
   }
 
   #updatePreview(defaultUser, users) {
@@ -38,7 +39,7 @@ export class UsersPreview {
         "data-reactid": user.id || "default",
       },
       title: user.id || "default",
-      onclick: () => user.id && this.#app.copyToClipboard(`<@${user.id}>`),
+      onclick: () => user.id && copyToClipboard(`<@${user.id}>`),
     });
 
     const animation = () => {

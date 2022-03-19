@@ -5,47 +5,54 @@ import { DefaultUserForm } from "./js/DefaultUserForm.js";
 import { ImportExport } from "./js/ImportExport.js";
 import { UsersEditor } from "./js/UsersEditor.js";
 import { UsersPreview } from "./js/UsersPreview.js";
-import { State } from "../lib/state.js";
+import { State, StateComponent } from "../lib/state.js";
+import { sortUsers } from "./js/utils.js";
 
-window.AppState = new State();
+export const States = Object.freeze({
+  DEFAULT_USER: "defaultUser",
+  USERS: "users",
+  SERVER: "server",
+});
 
-class App {
-  #states = {
-    defaultUser: null,
-    users: null,
-    server: null,
-  };
+window.AppState = new State(
+  { useEmitOnInit: false, useChangeEvent: true, useLogs: true },
+  {
+    [States.DEFAULT_USER]: {
+      defaultValue: null,
+      config: { useLocalStorage: true, useEvents: true },
+    },
+    [States.USERS]: {
+      defaultValue: [],
+      config: {
+        useLocalStorage: true,
+        useEvents: true,
+        onBeforeSet: sortUsers,
+      },
+    },
+    [States.SERVER]: {
+      defaultValue: {},
+      config: { useLocalStorage: true, useEvents: true },
+    },
+  }
+);
 
+class App extends StateComponent {
   constructor() {
-    this.#initStates();
+    super(AppState, true);
     this.#initComponents();
   }
 
-  #initStates() {
-    this.#states = {
-      defaultUser: AppState.init("defaultUser", null, { useLocalStorage: true, useEvents: true }),
-      users: AppState.init("users", [], { useLocalStorage: true, useEvents: true, onBeforeSet: this.sortUsers }),
-      server: AppState.init("server", {}, { useLocalStorage: true, useEvents: true }),
-    };
-  }
-
-  resetState() {
-    this.#states.defaultUser.set(null);
-    this.#states.users.set([]);
-    this.#states.server.set({});
-  }
-
   #initComponents() {
-    new DefaultUserForm(this);
-    new AddUserForm(this);
-    new UsersEditor(this);
-    new AnimationEditor(this);
-    new UsersPreview(this);
-    new ConfigEditor(this);
+    new DefaultUserForm();
+    new AddUserForm();
+    new UsersEditor();
+    new AnimationEditor();
+    new UsersPreview();
+    new ConfigEditor();
     new ImportExport(this);
   }
 
-  // Misc
+  // Utils
   async copyToClipboard(text) {
     try {
       return navigator.clipboard.writeText(text);
@@ -76,20 +83,6 @@ class App {
         range.select();
       }
     }
-  }
-
-  sortUsers(users) {
-    return users.sort((a, b) => {
-      if (a.date && b.date) {
-        return new Date(b.date) - new Date(a.date);
-      } else if (a.date) {
-        return -1;
-      } else if (b.date) {
-        return 1;
-      }
-
-      return a.id.localeCompare(b.id);
-    });
   }
 }
 

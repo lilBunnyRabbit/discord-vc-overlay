@@ -1,9 +1,8 @@
-export class ConfigEditor {
-  #app = null;
-  #states = {
-    users: null,
-    defaultUser: null,
-  };
+import { States } from "../index.js";
+import { StateComponent } from "../../lib/state.js";
+import { selectText } from "./utils.js";
+
+export class ConfigEditor extends StateComponent {
   #elements = {
     serverId: document.getElementById("input-config-server-id"),
     vcId: document.getElementById("input-config-vc-id"),
@@ -15,50 +14,61 @@ export class ConfigEditor {
   };
   #baseCss = "";
 
-  constructor(app) {
-    this.#app = app;
-    this.#states = {
-      users: AppState.attach("users").addListener((users) => {
-        this.#updateCustomCss(this.#states.defaultUser.get(), users);
-      }),
-      defaultUser: AppState.attach("defaultUser").addListener((defaultUser) => {
-        this.#updateCustomCss(defaultUser, this.#states.users.get());
-      }),
-      server: AppState.attach("server").addListener((server) => {
-        this.#updateUrl(server);
-      }),
-    };
+  constructor() {
+    super(AppState, [States.DEFAULT_USER, States.USERS, States.SERVER]);
 
     this.#init();
+  }
+
+  $onStateChange(key, value) {
+    this.#updateHeight();
+
+    switch (key) {
+      case States.DEFAULT_USER:
+        return this.#updateCustomCss(value, this.states.users.get());
+      case States.USERS:
+        return this.#updateCustomCss(this.states.defaultUser.get(), value);
+      case States.SERVER:
+        this.#updateInputs(value);
+        return this.#updateUrl(value);
+      default:
+        return;
+    }
   }
 
   async #init() {
     this.#baseCss = await fetch("/src/css/overlay.css").then((res) => res.text());
 
-    const server = this.#states.server.get();
+    const server = this.states.server.get();
 
     this.#updateHeight();
     this.#updateUrl(server);
-    this.#updateCustomCss(this.#states.defaultUser.get(), this.#states.users.get());
-
-    if (server.serverId && server.serverId.length > 0) {
-      this.#elements.serverId.value = server.serverId;
-    }
-
-    if (server.vcId && server.vcId.length > 0) {
-      this.#elements.vcId.value = server.vcId;
-    }
+    this.#updateCustomCss(this.states.defaultUser.get(), this.states.users.get());
+    this.#updateInputs(server);
 
     this.#addHandlers();
   }
 
+  // Handlers
   #addHandlers() {
-    this.#elements.serverId.oninput = (e) => this.#setServerId(e.target.value.trim());
-    this.#elements.vcId.oninput = (e) => this.#setVcId(e.target.value.trim());
+    const { serverId, vcId, url, height, customCss } = this.#elements;
+    serverId.oninput = (e) => this.#setServerId(e.target.value.trim());
+    vcId.oninput = (e) => this.#setVcId(e.target.value.trim());
 
-    this.#elements.url.onclick = this.#app.selectText.bind(this);
-    this.#elements.height.onclick = this.#app.selectText.bind(this);
-    this.#elements.customCss.onclick = this.#app.selectText.bind(this);
+    url.onclick = selectText.bind(this);
+    height.onclick = selectText.bind(this);
+    customCss.onclick = selectText.bind(this);
+  }
+
+  #updateInputs(server) {
+    const { serverId, vcId } = this.#elements;
+    if (serverId.value !== server.serverId) {
+      serverId.value = server.serverId === undefined ? "" : server.serverId;
+    }
+
+    if (vcId.value !== server.vcId) {
+      vcId.value = server.vcId === undefined ? "" : server.vcId;
+    }
   }
 
   #updateUrl(server) {
@@ -168,24 +178,24 @@ export class ConfigEditor {
     return anim3;
   }
 
-  // Tools
+  // Utils
   #setServerId(serverId) {
-    const server = this.#states.server.get();
+    const server = this.states.server.get();
     if (serverId.length === 0) {
       delete server.serverId;
-      this.#states.server.set(server);
+      this.states.server.set(server);
     } else {
-      this.#states.server.set({ ...server, serverId });
+      this.states.server.set({ ...server, serverId });
     }
   }
 
   #setVcId(vcId) {
-    const server = this.#states.server.get();
+    const server = this.states.server.get();
     if (vcId.length === 0) {
       delete server.vcId;
-      this.#states.server.set(server);
+      this.states.server.set(server);
     } else {
-      this.#states.server.set({ ...server, vcId });
+      this.states.server.set({ ...server, vcId });
     }
   }
 }

@@ -1,27 +1,28 @@
+import { States } from "../index.js";
+import { StateComponent } from "../../lib/state.js";
 import { HTML } from "../../lib/htmlBuilder.js";
+import { copyToClipboard } from "./utils.js";
 
-export class UsersEditor {
-  #app = null;
-  #states = {
-    users: null,
-    defaultUser: null,
-  };
+export class UsersEditor extends StateComponent {
   #elements = {
     editor: document.getElementById("user-editor"),
   };
 
-  constructor(app) {
-    this.#app = app;
-    this.#states = {
-      users: AppState.attach("users").addListener((users) => {
-        this.#updateEditor(this.#states.defaultUser.get(), users);
-      }),
-      defaultUser: AppState.attach("defaultUser").addListener((defaultUser) => {
-        this.#updateEditor(defaultUser, this.#states.users.get());
-      }),
-    };
+  constructor() {
+    super(AppState, [States.DEFAULT_USER, States.USERS]);
 
-    this.#updateEditor(this.#states.defaultUser.get(), this.#states.users.get());
+    this.#updateEditor(this.states.defaultUser.get(), this.states.users.get());
+  }
+
+  $onStateChange(key, value) {
+    switch (key) {
+      case States.DEFAULT_USER:
+        return this.#updateEditor(value, this.states.users.get());
+      case States.USERS:
+        return this.#updateEditor(this.states.defaultUser.get(), value);
+      default:
+        return;
+    }
   }
 
   #updateEditor(defaultUser, users) {
@@ -89,7 +90,7 @@ export class UsersEditor {
             HTML("div", {
               className: "user-editor-info-title",
               innerText: user.id || "Default user",
-              onclick: () => !isDefaultUser && this.#app.copyToClipboard(`<@${user.id}>`),
+              onclick: () => !isDefaultUser && copyToClipboard(`<@${user.id}>`),
               title: isDefaultUser ? "Default user" : `Copy "<@${user.id}>"`,
             }),
             HTML("div", {
@@ -174,31 +175,29 @@ export class UsersEditor {
     return form;
   }
 
-  // Tools
+  // Utils
   #updateDefaultUser(data) {
-    const defaultUser = this.#states.defaultUser.get();
-    this.#states.defaultUser.set({ ...defaultUser, data });
+    const defaultUser = this.states.defaultUser.get();
+    this.states.defaultUser.set({ ...defaultUser, data });
   }
 
   #removeDefaultUser() {
-    if (this.#states.defaultUser.get()) {
-      this.#states.defaultUser.set(null);
-    }
+    this.states.defaultUser.reset();
   }
 
   #updateUser(userId, data) {
-    const users = this.#states.users.get().map((user) => {
+    const users = this.states.users.get().map((user) => {
       if (user.id !== userId) return user;
       return {
         ...user,
         ...data,
       };
     });
-    this.#states.users.set(users);
+    this.states.users.set(users);
   }
 
   #removeUser(userId) {
-    const users = this.#states.users.get().filter(({ id }) => id !== userId);
-    this.#states.users.set(users);
+    const users = this.states.users.get().filter(({ id }) => id !== userId);
+    this.states.users.set(users);
   }
 }
